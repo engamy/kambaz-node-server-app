@@ -14,7 +14,7 @@ import EnrollmentsRoutes from "./Kambaz/Enrollments/routes.js";
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:3000",  
+  origin: "https://kambaz-next-js-self.vercel.app",  
   credentials: true
 }));
 
