@@ -10,11 +10,16 @@ import ModulesRoutes from "./Kambaz/Modules/routes.js";
 import AssignmentsRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentsRoutes from "./Kambaz/Enrollments/routes.js";
 
+import mongoose from "mongoose";
+
+const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz"
+mongoose.connect(CONNECTION_STRING);
+
 
 const app = express();
 
 app.use(cors({
-  origin: ["https://kambaz-next-js-self.vercel.app", "http://localhost:3000"],  
+  origin: ["https://kambaz-next-js-self.vercel.app", "http://localhost:3000" , "https://kambaz-next-js-2hr8.onrender.com/"],  
   credentials: true
 }));
 
