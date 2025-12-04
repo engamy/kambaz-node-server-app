@@ -49,7 +49,12 @@ mongoose.connect(CONNECTION_STRING, mongooseOptions).then(() => {
 const app = express();
 
 app.use(cors({
-  origin: ["https://kambaz-next-js-self.vercel.app", "http://localhost:3000" , "https://kambaz-next-js-2hr8.onrender.com/"],  
+  origin: [
+    "https://kambaz-next-js-self.vercel.app", 
+    "https://kambaz-next-js-assignment6.vercel.app",
+    "http://localhost:3000", 
+    "https://kambaz-next-js-2hr8.onrender.com"
+  ],  
   credentials: true
 }));
 
