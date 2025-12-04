@@ -34,7 +34,7 @@ mongoose.connect(CONNECTION_STRING)
 const app = express();
 
 app.use(cors({
-  origin: ["https://kambaz-next-js-self.vercel.app", "http://localhost:3000" , "https://kambaz-next-js-2hr8.onrender.com/"],  
+  origin: ["https://kambaz-next-js-self.vercel.app", "http://localhost:3000" , "https://kambaz-next-js-2hr8.onrender.com"],  
   credentials: true
 }));
 
@@ -52,7 +52,8 @@ if (process.env.SERVER_ENV !== "development") {
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
-    domain: process.env.SERVER_URL
+    // Don't set domain for cross-domain cookies - let the browser handle it
+    // The Next.js API proxy will forward cookies correctly
   };
 } else {
   sessionOptions.cookie = {
