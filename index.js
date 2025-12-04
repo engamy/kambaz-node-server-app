@@ -12,7 +12,23 @@ import EnrollmentsRoutes from "./Kambaz/Enrollments/routes.js";
 
 import mongoose from "mongoose";
 
-const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz"
+// Check multiple common environment variable names for MongoDB connection string
+const CONNECTION_STRING = 
+  process.env.DATABASE_CONNECTION_STRING || 
+  process.env.MONGODB_URI || 
+  process.env.MONGO_URL || 
+  process.env.MONGODB_URL ||
+  "mongodb://127.0.0.1:27017/kambaz";
+
+mongoose.connect(CONNECTION_STRING)
+  .then(() => {
+    console.log("Connected to MongoDB successfully");
+  })
+  .catch((error) => {
+    console.error("MongoDB connection error:", error);
+    console.error("Connection string used:", CONNECTION_STRING.replace(/\/\/[^:]+:[^@]+@/, "//***:***@")); // Hide credentials in logs
+    process.exit(1);
+  });
 
 if (!process.env.DATABASE_CONNECTION_STRING && process.env.NODE_ENV === 'production') {
   console.error('DATABASE_CONNECTION_STRING environment variable is required in production');
@@ -72,7 +88,8 @@ if (process.env.SERVER_ENV !== "development") {
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
-    domain: process.env.SERVER_URL
+    // Don't set domain for cross-domain cookies - let the browser handle it
+    // The Next.js API proxy will forward cookies correctly
   };
 } else {
   sessionOptions.cookie = {
