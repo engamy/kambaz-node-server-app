@@ -23,8 +23,17 @@ export default function CourseRoutes(app, db) {
   app.post("/api/users/current/courses", createCourse);
 
   const findAllCourses = async (req, res) => {
-    const courses = await dao.findAllCourses();
-    res.send(courses);
+    try {
+      const courses = await dao.findAllCourses();
+      console.log("Found courses:", courses?.length || 0);
+      if (courses && courses.length > 0) {
+        console.log("Sample course:", JSON.stringify(courses[0], null, 2));
+      }
+      res.json(courses);
+    } catch (error) {
+      console.error("Error finding all courses:", error);
+      res.status(500).json({ message: "Error finding courses", error: error.message });
+    }
   }
   app.get("/api/courses", findAllCourses);
 

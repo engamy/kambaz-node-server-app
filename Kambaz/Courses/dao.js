@@ -4,8 +4,9 @@ import db from "../Database/index.js";
 
 export default function CoursesDao() {
 
-  function findAllCourses() {
-    return model.find();
+  async function findAllCourses() {
+    const courses = await model.find().lean();
+    return courses;
   }
 
   async function findCoursesForEnrolledUser(userId) {
