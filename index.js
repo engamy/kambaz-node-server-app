@@ -30,11 +30,47 @@ mongoose.connect(CONNECTION_STRING)
     process.exit(1);
   });
 
+if (!process.env.DATABASE_CONNECTION_STRING && process.env.NODE_ENV === 'production') {
+  console.error('DATABASE_CONNECTION_STRING environment variable is required in production');
+  process.exit(1);
+}
+
+// Configure mongoose connection options
+const mongooseOptions = {
+  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+};
+
+// Connect to MongoDB with better error handling
+mongoose.connect(CONNECTION_STRING, mongooseOptions).then(() => {
+  console.log('Connected to MongoDB');
+}).catch(err => {
+  console.error('MongoDB connection error:', err.message);
+  if (err.message.includes('ECONNREFUSED')) {
+    console.error('\n⚠️  MongoDB is not running!');
+    console.error('Please start MongoDB by running:');
+    console.error('  mongod --dbpath ./data');
+    console.error('\nOr if MongoDB is installed as a service:');
+    console.error('  net start MongoDB (Windows)');
+    console.error('  brew services start mongodb-community (macOS)');
+    console.error('  sudo systemctl start mongod (Linux)');
+  }
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  } else {
+    console.error('\n⚠️  App will continue but database operations will fail until MongoDB is started.');
+    console.error('   Start MongoDB and restart the server to enable database functionality.\n');
+  }
+});
 
 const app = express();
 
 app.use(cors({
-  origin: ["https://kambaz-next-js-self.vercel.app", "http://localhost:3000" , "https://kambaz-next-js-2hr8.onrender.com"],  
+  origin: [
+    "https://kambaz-next-js-self.vercel.app", 
+    "https://kambaz-next-js-assignment6.vercel.app",
+    "http://localhost:3000", 
+    "https://kambaz-next-js-2hr8.onrender.com"
+  ],  
   credentials: true
 }));
 

@@ -2,17 +2,17 @@ import CoursesDao from "./dao.js";
 import EnrollmentsDao from "../Enrollments/dao.js";
 
 export default function CourseRoutes(app, db) {
-  const dao = CoursesDao(db);
+  const dao = CoursesDao();
 
   const enrollmentsDao = EnrollmentsDao(db);
-  const createCourse = (req, res) => {
+  const createCourse = async (req, res) => {
     try {
-      const currentUser = req.session.currentUser;
+      const currentUser = req.session["currentUser"];
       if (!currentUser) {
         res.sendStatus(401);
         return;
       }
-      const newCourse = dao.createCourse(req.body);
+      const newCourse = await dao.createCourse(req.body);
       enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);
       res.json(newCourse);
     } catch (error) {
@@ -22,20 +22,20 @@ export default function CourseRoutes(app, db) {
   };
   app.post("/api/users/current/courses", createCourse);
 
-  const findAllCourses = (req, res) => {
-    const courses = dao.findAllCourses();
+  const findAllCourses = async (req, res) => {
+    const courses = await dao.findAllCourses();
     res.send(courses);
   }
   app.get("/api/courses", findAllCourses);
 
-  const deleteCourse = (req, res) => {
+  const deleteCourse = async(req, res) => {
     try {
       const { courseId } = req.params;
       if (!courseId) {
         res.status(400).json({ message: "Course ID is required" });
         return;
       }
-      dao.deleteCourse(courseId);
+      await dao.deleteCourse(courseId);
       res.sendStatus(200);
     } catch (error) {
       console.error("Error deleting course:", error);
@@ -45,22 +45,22 @@ export default function CourseRoutes(app, db) {
   app.delete("/api/courses/:courseId", deleteCourse);
 
 
-  const findCoursesForEnrolledUser = (req, res) => {
+  const findCoursesForEnrolledUser = async (req, res) => {
     let { userId } = req.params;
     if (userId === "current") {
-      const currentUser = req.session.currentUser;
+      const currentUser = req.session["currentUser"];
       if (!currentUser) {
         res.sendStatus(401);
         return;
       }
       userId = currentUser._id;
     }
-    const courses = dao.findCoursesForEnrolledUser(userId);
+    const courses = await dao.findCoursesForEnrolledUser(userId);
     res.json(courses);
   };
   app.get("/api/users/:userId/courses", findCoursesForEnrolledUser);
 
-  const updateCourse = (req, res) => {
+  const updateCourse = async (req, res) => {
     try {
       const { courseId } = req.params;
       if (!courseId || courseId === "0") {
@@ -72,7 +72,7 @@ export default function CourseRoutes(app, db) {
         res.status(400).json({ message: "Invalid course data" });
         return;
       }
-      const updatedCourse = dao.updateCourse(courseId, courseUpdates);
+      const updatedCourse = await dao.updateCourse(courseId, courseUpdates);
       if (!updatedCourse) {
         res.sendStatus(404);
         return;
