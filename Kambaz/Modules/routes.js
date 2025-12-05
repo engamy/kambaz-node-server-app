@@ -72,6 +72,6 @@ export default function ModulesRoutes(app, db) {
       res.status(500).json({ message: "Error updating module", error: error.message });
     }
   }
-  app.put("/api/modules/:moduleId", updateModule);
+  app.put("/api/courses/:courseId/modules/:moduleId", updateModule);
   
 }
