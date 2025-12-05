@@ -3,7 +3,7 @@ import EnrollmentsDao from "./dao.js";
 export default function EnrollmentsRoutes(app, db) {
   const dao = EnrollmentsDao(db);
 
-  const enrollUserInCourse = (req, res) => {
+  const enrollUserInCourse = async (req, res) => {
     try {
       const currentUser = req.session.currentUser;
       if (!currentUser) {
@@ -20,7 +20,7 @@ export default function EnrollmentsRoutes(app, db) {
         res.status(400).json({ message: "Course ID is required" });
         return;
       }
-      const enrollment = dao.enrollUserInCourse(currentUser._id, courseId);
+      const enrollment = await dao.enrollUserInCourse(currentUser._id, courseId);
       res.json(enrollment);
     } catch (error) {
       console.error("Error enrolling user in course:", error);
@@ -59,7 +59,7 @@ export default function EnrollmentsRoutes(app, db) {
   };
   app.delete("/api/users/current/courses/:courseId/enrollments", unenrollUserFromCourse);
 
-  const findEnrollment = (req, res) => {
+  const findEnrollment = async (req, res) => {
     try {
       const currentUser = req.session.currentUser;
       if (!currentUser) {
@@ -71,7 +71,7 @@ export default function EnrollmentsRoutes(app, db) {
         res.status(400).json({ message: "Course ID is required" });
         return;
       }
-      const enrollment = dao.findEnrollment(currentUser._id, courseId);
+      const enrollment = await dao.findEnrollment(currentUser._id, courseId);
       if (!enrollment) {
         res.sendStatus(404);
         return;

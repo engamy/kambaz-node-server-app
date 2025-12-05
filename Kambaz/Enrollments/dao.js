@@ -11,7 +11,12 @@ export default function EnrollmentsDao(db) {
    return enrollments.map((enrollment) => enrollment.user);
  }
 
- function enrollUserInCourse(userId, courseId) {
+ async function enrollUserInCourse(userId, courseId) {
+   // Check if enrollment already exists
+   const existing = await model.findOne({ user: userId, course: courseId });
+   if (existing) {
+     return existing; // Return existing enrollment instead of creating duplicate
+   }
    return model.create({
      user: userId,
      course: courseId,
@@ -19,6 +24,10 @@ export default function EnrollmentsDao(db) {
    });
  }
  
+ async function findEnrollment(userId, courseId) {
+   return model.findOne({ user: userId, course: courseId });
+ }
+
  function unenrollUserFromCourse(user, course) {
    return model.deleteOne({ user, course });
  }
@@ -31,6 +40,7 @@ return {
   findCoursesForUser,
   findUsersForCourse,
   enrollUserInCourse,
+  findEnrollment,
   unenrollUserFromCourse,
   unenrollAllUsersFromCourse,
 };
