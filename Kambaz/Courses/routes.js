@@ -28,8 +28,12 @@ export default function CourseRoutes(app, db) {
       console.log("Found courses:", courses?.length || 0);
       if (courses && courses.length > 0) {
         console.log("Sample course:", JSON.stringify(courses[0], null, 2));
+        console.log("Sample course name:", courses[0]?.name);
+        console.log("Sample course description:", courses[0]?.description);
+        console.log("Sample course keys:", Object.keys(courses[0] || {}));
       }
-      res.json(courses);
+      // Ensure we return an array even if empty
+      res.json(courses || []);
     } catch (error) {
       console.error("Error finding all courses:", error);
       res.status(500).json({ message: "Error finding courses", error: error.message });

@@ -20,16 +20,6 @@ const CONNECTION_STRING =
   process.env.MONGODB_URL ||
   "mongodb://127.0.0.1:27017/kambaz";
 
-mongoose.connect(CONNECTION_STRING)
-  .then(() => {
-    console.log("Connected to MongoDB successfully");
-  })
-  .catch((error) => {
-    console.error("MongoDB connection error:", error);
-    console.error("Connection string used:", CONNECTION_STRING.replace(/\/\/[^:]+:[^@]+@/, "//***:***@")); // Hide credentials in logs
-    process.exit(1);
-  });
-
 if (!process.env.DATABASE_CONNECTION_STRING && process.env.NODE_ENV === 'production') {
   console.error('DATABASE_CONNECTION_STRING environment variable is required in production');
   process.exit(1);
@@ -42,9 +32,10 @@ const mongooseOptions = {
 
 // Connect to MongoDB with better error handling
 mongoose.connect(CONNECTION_STRING, mongooseOptions).then(() => {
-  console.log('Connected to MongoDB');
+  console.log('Connected to MongoDB successfully');
 }).catch(err => {
   console.error('MongoDB connection error:', err.message);
+  console.error('Connection string used:', CONNECTION_STRING.replace(/\/\/[^:]+:[^@]+@/, "//***:***@")); // Hide credentials in logs
   if (err.message.includes('ECONNREFUSED')) {
     console.error('\n⚠️  MongoDB is not running!');
     console.error('Please start MongoDB by running:');

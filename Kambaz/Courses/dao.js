@@ -6,6 +6,12 @@ export default function CoursesDao() {
 
   async function findAllCourses() {
     const courses = await model.find().lean();
+    // Log first course to debug
+    if (courses && courses.length > 0) {
+      console.log("DAO - First course:", JSON.stringify(courses[0], null, 2));
+      console.log("DAO - First course name:", courses[0].name);
+      console.log("DAO - First course description:", courses[0].description);
+    }
     return courses;
   }
 
