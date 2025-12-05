@@ -14,6 +14,11 @@ export default function CoursesDao() {
         console.error("findAllCourses: courses is not an array:", typeof courses);
         return [];
       }
+      // Log first course to see all available fields
+      if (courses.length > 0) {
+        console.log("DAO - Raw course from DB:", JSON.stringify(courses[0], null, 2));
+        console.log("DAO - All fields in first course:", Object.keys(courses[0]));
+      }
       // Ensure all courses have name and description fields
       return courses.map(course => {
         try {
@@ -21,10 +26,13 @@ export default function CoursesDao() {
             return null;
           }
           const courseId = course._id || course.id || "unknown";
+          // Check for alternative field names
+          const courseName = course.name || course.title || course.courseName || `Course ${String(courseId).substring(0, 8)}`;
+          const courseDescription = course.description || course.desc || course.courseDescription || "No description available";
           return {
             ...course,
-            name: course.name || `Course ${String(courseId).substring(0, 8)}`,
-            description: course.description || "No description available"
+            name: courseName,
+            description: courseDescription
           };
         } catch (mapError) {
           console.error("Error mapping course:", mapError, course);

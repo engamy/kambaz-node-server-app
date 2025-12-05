@@ -1,5 +1,6 @@
 import CoursesDao from "./dao.js";
 import EnrollmentsDao from "../Enrollments/dao.js";
+import model from "./model.js";
 
 export default function CourseRoutes(app, db) {
   const dao = CoursesDao();
@@ -29,10 +30,10 @@ export default function CourseRoutes(app, db) {
       const courses = await dao.findAllCourses();
       console.log("Found courses:", courses?.length || 0);
       if (courses && courses.length > 0) {
-        console.log("Sample course:", JSON.stringify(courses[0], null, 2));
-        console.log("Sample course name:", courses[0]?.name);
-        console.log("Sample course description:", courses[0]?.description);
-        console.log("Sample course keys:", Object.keys(courses[0] || {}));
+        const rawCourse = await model.findOne({ _id: courses[0]._id }).lean();
+        console.log("Raw course from DB (before processing):", JSON.stringify(rawCourse, null, 2));
+        console.log("All course fields:", Object.keys(rawCourse || {}));
+        console.log("Sample course (after processing):", JSON.stringify(courses[0], null, 2));
       }
       // Ensure we return an array even if empty
       res.json(courses || []);
@@ -99,5 +100,50 @@ export default function CourseRoutes(app, db) {
     }
   }
   app.put("/api/courses/:courseId", updateCourse);
+
+  // Admin endpoint to update all courses with missing name/description
+  const updateAllCourses = async (req, res) => {
+    try {
+      const courses = await model.find({
+        $or: [
+          { name: { $exists: false } },
+          { name: null },
+          { name: "" },
+          { description: { $exists: false } },
+          { description: null },
+          { description: "" }
+        ]
+      }).lean();
+
+      console.log(`Found ${courses.length} courses that need updating`);
+
+      let updatedCount = 0;
+      for (const course of courses) {
+        const updates = {};
+        if (!course.name || course.name === "") {
+          updates.name = `Course ${course._id.substring(0, 8)}`;
+        }
+        if (!course.description || course.description === "") {
+          updates.description = "No description available";
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await model.updateOne({ _id: course._id }, { $set: updates });
+          updatedCount++;
+          console.log(`Updated course ${course._id}:`, updates);
+        }
+      }
+
+      res.json({ 
+        message: `Successfully updated ${updatedCount} courses`,
+        updated: updatedCount,
+        total: courses.length
+      });
+    } catch (error) {
+      console.error("Error updating all courses:", error);
+      res.status(500).json({ message: "Error updating courses", error: error.message });
+    }
+  };
+  app.post("/api/courses/update-all", updateAllCourses);
 
 }
