@@ -1,15 +1,15 @@
 import ModulesDao from "../Modules/dao.js";
+
 export default function ModulesRoutes(app, db) {
   const dao = ModulesDao(db);
-
-  const findModulesForCourse = (req, res) => {
+  const findModulesForCourse = async (req, res) => {
     const { courseId } = req.params;
-    const modules = dao.findModulesForCourse(courseId);
+    const modules = await dao.findModulesForCourse(courseId);
     res.json(modules);
-  }
+  }  
   app.get("/api/courses/:courseId/modules", findModulesForCourse);
 
-  const createModuleForCourse = (req, res) => {
+  const createModuleForCourse = async (req, res) => {
     try {
       const { courseId } = req.params;
       if (!courseId) {
@@ -18,9 +18,9 @@ export default function ModulesRoutes(app, db) {
       }
       const module = {
         ...req.body,
-        course: courseId,
+        // course: courseId,
       };
-      const newModule = dao.createModule(module);
+      const newModule = await dao.createModule(courseId, module);
       res.json(newModule);
     } catch (error) {
       console.error("Error creating module:", error);
@@ -29,14 +29,14 @@ export default function ModulesRoutes(app, db) {
   }
   app.post("/api/courses/:courseId/modules", createModuleForCourse);
 
-  const deleteModule = (req, res) => {
+  const deleteModule = async (req, res) => {
     try {
-      const { moduleId } = req.params;
+      const { courseId, moduleId } = req.params;
       if (!moduleId) {
         res.status(400).json({ message: "Module ID is required" });
         return;
       }
-      const deleted = dao.deleteModule(moduleId);
+      const deleted = await dao.deleteModule(courseId, moduleId);
       if (!deleted) {
         res.sendStatus(404);
         return;
@@ -47,11 +47,11 @@ export default function ModulesRoutes(app, db) {
       res.status(500).json({ message: "Error deleting module", error: error.message });
     }
   }
-  app.delete("/api/modules/:moduleId", deleteModule);
+  app.delete("/api/courses/:courseId/modules/:moduleId", deleteModule);
 
-  const updateModule = (req, res) => {
+  const updateModule = async (req, res) => {
     try {
-      const { moduleId } = req.params;
+      const { courseId, moduleId } = req.params;
       if (!moduleId) {
         res.status(400).json({ message: "Module ID is required" });
         return;
@@ -61,7 +61,7 @@ export default function ModulesRoutes(app, db) {
         res.status(400).json({ message: "Invalid module data" });
         return;
       }
-      const updatedModule = dao.updateModule(moduleId, moduleUpdates);
+      const updatedModule = await dao.updateModule(courseId, moduleId, moduleUpdates);
       if (!updatedModule) {
         res.sendStatus(404);
         return;

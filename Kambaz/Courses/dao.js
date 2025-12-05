@@ -6,39 +6,8 @@ export default function CoursesDao() {
 
   async function findAllCourses() {
     try {
-      const courses = await model.find().lean();
-      if (!courses) {
-        return [];
-      }
-      if (!Array.isArray(courses)) {
-        console.error("findAllCourses: courses is not an array:", typeof courses);
-        return [];
-      }
-      // Log first course to see all available fields
-      if (courses.length > 0) {
-        console.log("DAO - Raw course from DB:", JSON.stringify(courses[0], null, 2));
-        console.log("DAO - All fields in first course:", Object.keys(courses[0]));
-      }
-      // Ensure all courses have name and description fields
-      return courses.map(course => {
-        try {
-          if (!course) {
-            return null;
-          }
-          const courseId = course._id || course.id || "unknown";
-          // Check for alternative field names
-          const courseName = course.name || course.title || course.courseName || `Course ${String(courseId).substring(0, 8)}`;
-          const courseDescription = course.description || course.desc || course.courseDescription || "No description available";
-          return {
-            ...course,
-            name: courseName,
-            description: courseDescription
-          };
-        } catch (mapError) {
-          console.error("Error mapping course:", mapError, course);
-          return null;
-        }
-      }).filter(course => course !== null);
+      const courses = await model.find({}, { name: 1, description: 1 });
+      return courses;
     } catch (error) {
       console.error("Error in findAllCourses:", error);
       throw error;
