@@ -207,5 +207,13 @@ export default function CourseRoutes(app, db) {
     }
   };
   app.post("/api/courses/update-all", updateAllCourses);
+  
+  const findUsersForCourse = async (req, res) => {
+    const { cid } = req.params;
+    const users = await enrollmentsDao.findUsersForCourse(cid);
+    res.json(users);
+  }
+  app.get("/api/courses/:cid/users", findUsersForCourse);
+
 
 }
