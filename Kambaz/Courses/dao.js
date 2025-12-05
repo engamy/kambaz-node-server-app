@@ -5,13 +5,36 @@ import db from "../Database/index.js";
 export default function CoursesDao() {
 
   async function findAllCourses() {
-    const courses = await model.find().lean();
-    // Ensure all courses have name and description fields
-    return courses.map(course => ({
-      ...course,
-      name: course.name || `Course ${course._id.substring(0, 8)}`,
-      description: course.description || "No description available"
-    }));
+    try {
+      const courses = await model.find().lean();
+      if (!courses) {
+        return [];
+      }
+      if (!Array.isArray(courses)) {
+        console.error("findAllCourses: courses is not an array:", typeof courses);
+        return [];
+      }
+      // Ensure all courses have name and description fields
+      return courses.map(course => {
+        try {
+          if (!course) {
+            return null;
+          }
+          const courseId = course._id || course.id || "unknown";
+          return {
+            ...course,
+            name: course.name || `Course ${String(courseId).substring(0, 8)}`,
+            description: course.description || "No description available"
+          };
+        } catch (mapError) {
+          console.error("Error mapping course:", mapError, course);
+          return null;
+        }
+      }).filter(course => course !== null);
+    } catch (error) {
+      console.error("Error in findAllCourses:", error);
+      throw error;
+    }
   }
 
   async function findCoursesForEnrolledUser(userId) {

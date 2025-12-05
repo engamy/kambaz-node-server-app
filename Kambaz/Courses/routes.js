@@ -9,9 +9,11 @@ export default function CourseRoutes(app, db) {
     try {
       const currentUser = req.session["currentUser"];
       if (!currentUser) {
-        res.sendStatus(401);
+        console.error("Create course: No current user in session");
+        res.status(401).json({ message: "You must be signed in to create a course" });
         return;
       }
+      console.log("Create course: Current user:", currentUser._id);
       const newCourse = await dao.createCourse(req.body);
       enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);
       res.json(newCourse);
