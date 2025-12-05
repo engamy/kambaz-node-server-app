@@ -6,13 +6,12 @@ export default function CoursesDao() {
 
   async function findAllCourses() {
     const courses = await model.find().lean();
-    // Log first course to debug
-    if (courses && courses.length > 0) {
-      console.log("DAO - First course:", JSON.stringify(courses[0], null, 2));
-      console.log("DAO - First course name:", courses[0].name);
-      console.log("DAO - First course description:", courses[0].description);
-    }
-    return courses;
+    // Ensure all courses have name and description fields
+    return courses.map(course => ({
+      ...course,
+      name: course.name || `Course ${course._id.substring(0, 8)}`,
+      description: course.description || "No description available"
+    }));
   }
 
   async function findCoursesForEnrolledUser(userId) {
@@ -24,8 +23,22 @@ export default function CoursesDao() {
     console.log("you have enrolled in some courses");
   }
 
-  function createCourse(course) {
-    const newCourse = { ...course, _id: uuidv4() };
+  async function createCourse(course) {
+    // Ensure required fields are present
+    if (!course.name) {
+      throw new Error("Course name is required");
+    }
+    if (!course.description) {
+      throw new Error("Course description is required");
+    }
+    const newCourse = { 
+      _id: uuidv4(),
+      name: course.name,
+      number: course.number || "",
+      credits: course.credits || 0,
+      description: course.description,
+      modules: course.modules || []
+    };
     return model.create(newCourse);
   }  
 
